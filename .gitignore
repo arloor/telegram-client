@@ -1,0 +1,7 @@
+# Project exclude paths
+/target/
+.idea/
+tdlib-use.iml
+tdlib/
+tdlib.log
+
