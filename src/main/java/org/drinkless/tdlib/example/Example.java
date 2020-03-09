@@ -304,7 +304,7 @@ public final class Example {
 
     private static void sendMessage(long chatId, String message) {
         // initialize reply markup just for testing
-        TdApi.InlineKeyboardButton[] row = {new TdApi.InlineKeyboardButton("https://telegram.org?1", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?2", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?3", new TdApi.InlineKeyboardButtonTypeUrl())};
+        TdApi.InlineKeyboardButton[] row = {new TdApi.InlineKeyboardButton("https://telegram.org?1", new TdApi.InlineKeyboardButtonTypeUrl("https://telegram.org?1")), new TdApi.InlineKeyboardButton("https://telegram.org?2", new TdApi.InlineKeyboardButtonTypeUrl("https://telegram.org?1")), new TdApi.InlineKeyboardButton("https://telegram.org?3", new TdApi.InlineKeyboardButtonTypeUrl("https://telegram.org?1"))};
         TdApi.ReplyMarkup replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{row, row, row});
 
         TdApi.InputMessageContent content = new TdApi.InputMessageText(new TdApi.FormattedText(message, null), false, true);
@@ -404,7 +404,7 @@ public final class Example {
     }
 
     private static TdApi.User getOrQueryUser(int userID) {
-        if(userID==0){
+        if (userID == 0) {
             return null;
         }
         TdApi.User sendUser = users.get(userID);
@@ -430,7 +430,37 @@ public final class Example {
         @Override
         public void onResult(TdApi.Object object) {
             switch (object.getConstructor()) {
-                case TdApi.UpdateNewMessage.CONSTRUCTOR://todo：接受消息
+                case TdApi.UpdateNewCallbackQuery.CONSTRUCTOR: {
+                    TdApi.UpdateNewCallbackQuery newCallbackQuery = (TdApi.UpdateNewCallbackQuery) object;
+                    //获取sender User信息
+                    int senderID = newCallbackQuery.senderUserId;
+                    String sender = String.valueOf(senderID);
+                    TdApi.User sendUser = getOrQueryUser(senderID);
+                    if (Objects.nonNull(sendUser)) {
+                        sender = sendUser.firstName + " " + (sendUser.lastName.length() > 0 ? sendUser.lastName : "");
+                    }
+                    //获取Chat信息
+                    long chatId = newCallbackQuery.chatId;
+                    String chatName = String.valueOf(chatId);
+                    TdApi.Chat targetChat = getOrQueryChat(chatId);
+                    if (Objects.nonNull(targetChat)) {
+                        chatName = targetChat.title;
+                    }
+
+                    if (newCallbackQuery.payload instanceof TdApi.CallbackQueryPayloadData) {
+                        byte[] reply = ((TdApi.CallbackQueryPayloadData) newCallbackQuery.payload).data;
+                        String replyStr = new String(reply);
+                        if (replyStr.startsWith("nobot")) {
+                            logger.info(String.format("解封 %s@%s %s@%s", sender, chatName, senderID, chatId)); //打印文本
+                            client.send(new TdApi.SetChatMemberStatus(newCallbackQuery.chatId, newCallbackQuery.senderUserId, new TdApi.ChatMemberStatusRestricted(true, 0, new TdApi.ChatPermissions(true, true, false, true, true, false, true, false))), defaultHandler);
+                            client.send(new TdApi.AnswerCallbackQuery(newCallbackQuery.id, "您可以自由发言", true, null, 1), defaultHandler);
+                        } else {
+                            client.send(new TdApi.AnswerCallbackQuery(newCallbackQuery.id, "不要瞎点！", true, null, 1), defaultHandler);
+                        }
+                    }
+                    break;
+                }
+                case TdApi.UpdateNewMessage.CONSTRUCTOR: {//todo：接受消息
                     TdApi.UpdateNewMessage message = (TdApi.UpdateNewMessage) object;
 
                     //获取sender User信息
@@ -459,20 +489,34 @@ public final class Example {
 //                        System.out.println(JSONObject.toJSON(messageContent));
                     }
 
-                    if(adminChatId!=null&&chatId == getChatId(adminChatId)){//管理群组的消息做特殊处理
+                    if (adminChatId != null && chatId == getChatId(adminChatId)) {//管理群组的消息做特殊处理
                         // 本群组的所有消息类型都日志记录
-                        logger.info(newLine+"("+sender+")@"+chatName+" "+senderID+"@"+chatId+newLine + object);
+                        logger.info(newLine + "(" + sender + ")@" + chatName + " " + senderID + "@" + chatId + newLine + object);
                         if (message.message.content instanceof TdApi.MessageChatAddMembers) {
                             int[] memberUserIds = ((TdApi.MessageChatAddMembers) message.message.content).memberUserIds;
-                            String msg = "欢迎来到本群组" + newLine
-                                    + "博客：http://arloor.com" + newLine
-                                    + "Github: https://github.com/arloor" + newLine
-                                    + "From电报Tdlib jni应用";
+                            String msg = "欢迎来到本群组~~~" + newLine;
+
+                            TdApi.ReplyMarkupInlineKeyboard replyMarkup = null;
+                            if (me != null && me.type instanceof TdApi.UserTypeBot) {//如果是bot，则增加防bot设置
+                                TdApi.InlineKeyboardButton[] rowBlog = {new TdApi.InlineKeyboardButton("博客地址", new TdApi.InlineKeyboardButtonTypeUrl("http://arloor.com"))};
+                                TdApi.InlineKeyboardButton[] rowGithub = {new TdApi.InlineKeyboardButton("Github", new TdApi.InlineKeyboardButtonTypeUrl("https://github.com/arloor"))};
+                                TdApi.InlineKeyboardButton[] notBot = {new TdApi.InlineKeyboardButton("我不是机器人", new TdApi.InlineKeyboardButtonTypeCallback(String.format("nobot^%s@%s", "-1001334979774", 236978176).getBytes()))};
+                                replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{notBot, rowBlog, rowGithub});
+                                logger.info(String.format("封禁新加群的%s@%s %s@%s", sender, chatName, senderID, chatName)); //打印文本
+                                client.send(new TdApi.SetChatMemberStatus(chatId, senderID, new TdApi.ChatMemberStatusRestricted(true, 0, new TdApi.ChatPermissions(false, false, false, false, false, false, false, false))), defaultHandler);
+                                msg += "请点击“我不是机器人”获取发言权限" + newLine
+                                        + "—— From电报Tdlib jni应用";
+                            } else {
+                                msg += "博客地址：http://arloor.com" + newLine
+                                        + "Github：https://github.com/arloor" + newLine
+                                        + "—— From电报Tdlib jni应用";
+                            }
                             TdApi.InputMessageContent content = new TdApi.InputMessageText(new TdApi.FormattedText(msg, null), false, true);
-                            client.send(new TdApi.SendMessage(chatId, message.message.id, null, null, content), defaultHandler);
+                            client.send(new TdApi.SendMessage(chatId, message.message.id, null, replyMarkup, content), defaultHandler);
                         }
                     }
                     break;
+                }
                 case TdApi.UpdateAuthorizationState.CONSTRUCTOR:
                     onAuthorizationStateUpdated(((TdApi.UpdateAuthorizationState) object).authorizationState);
                     break;
