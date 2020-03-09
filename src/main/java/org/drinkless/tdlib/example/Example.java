@@ -502,7 +502,7 @@ public final class Example {
                                 TdApi.InlineKeyboardButton[] rowGithub = {new TdApi.InlineKeyboardButton("Github", new TdApi.InlineKeyboardButtonTypeUrl("https://github.com/arloor"))};
                                 TdApi.InlineKeyboardButton[] notBot = {new TdApi.InlineKeyboardButton("我不是机器人", new TdApi.InlineKeyboardButtonTypeCallback(String.format("nobot^%s@%s", "-1001334979774", 236978176).getBytes()))};
                                 replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{notBot, rowBlog, rowGithub});
-                                logger.info(String.format("封禁新加群的%s@%s %s@%s", sender, chatName, senderID, chatName)); //打印文本
+                                logger.info(String.format("封禁新加群的%s@%s %s@%s", sender, chatName, senderID, chatId)); //打印文本
                                 client.send(new TdApi.SetChatMemberStatus(chatId, senderID, new TdApi.ChatMemberStatusRestricted(true, 0, new TdApi.ChatPermissions(false, false, false, false, false, false, false, false))), defaultHandler);
                                 msg += "请点击“我不是机器人”获取发言权限" + newLine
                                         + "—— From电报Tdlib jni应用";
