@@ -13,7 +13,6 @@
 
 ```
 git clone https://github.com/arloor/tdlib-use
-git checkout raw 
 ```
 
 **2**. 编辑run configuration
