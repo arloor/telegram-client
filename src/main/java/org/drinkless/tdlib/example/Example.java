@@ -450,11 +450,27 @@ public final class Example {
                     if (newCallbackQuery.payload instanceof TdApi.CallbackQueryPayloadData) {
                         byte[] reply = ((TdApi.CallbackQueryPayloadData) newCallbackQuery.payload).data;
                         String replyStr = new String(reply);
+                        boolean done = false;
                         if (replyStr.startsWith("nobot")) {
-                            logger.info(String.format("解封 %s@%s %s@%s", sender, chatName, senderID, chatId)); //打印文本
-                            client.send(new TdApi.SetChatMemberStatus(newCallbackQuery.chatId, newCallbackQuery.senderUserId, new TdApi.ChatMemberStatusRestricted(true, 0, new TdApi.ChatPermissions(true, true, false, true, true, false, true, false))), defaultHandler);
-                            client.send(new TdApi.AnswerCallbackQuery(newCallbackQuery.id, "您可以自由发言", true, null, 1), defaultHandler);
-                        } else {
+                            String[] split = replyStr.split("\\^");
+                            if (split.length == 2) {
+                                String userIdAndChatId = split[1];
+                                String[] userIdChatIdSplit = userIdAndChatId.split("@");
+                                if (userIdChatIdSplit.length == 2) {
+                                    String replyMarkUserId = userIdChatIdSplit[0];
+                                    String replyMarkChatId = userIdChatIdSplit[1];
+                                    if (getChatId(replyMarkChatId) == chatId && Integer.parseInt(replyMarkUserId) == senderID) {
+                                        logger.info(String.format("解封 %s@%s %s@%s", sender, chatName, senderID, chatId)); //打印文本
+                                        client.send(new TdApi.SetChatMemberStatus(newCallbackQuery.chatId, newCallbackQuery.senderUserId, new TdApi.ChatMemberStatusRestricted(true, 0, new TdApi.ChatPermissions(true, true, false, true, true, false, true, false))), defaultHandler);
+                                        client.send(new TdApi.AnswerCallbackQuery(newCallbackQuery.id, "您可以自由发言", true, null, 1), defaultHandler);
+                                        done = true;
+                                    }
+                                }
+                            }
+
+                        }
+
+                        if (!done) {
                             client.send(new TdApi.AnswerCallbackQuery(newCallbackQuery.id, "不要瞎点！", true, null, 1), defaultHandler);
                         }
                     }
@@ -500,7 +516,7 @@ public final class Example {
                             if (me != null && me.type instanceof TdApi.UserTypeBot) {//如果是bot，则增加防bot设置
                                 TdApi.InlineKeyboardButton[] rowBlog = {new TdApi.InlineKeyboardButton("博客地址", new TdApi.InlineKeyboardButtonTypeUrl("http://arloor.com"))};
                                 TdApi.InlineKeyboardButton[] rowGithub = {new TdApi.InlineKeyboardButton("Github", new TdApi.InlineKeyboardButtonTypeUrl("https://github.com/arloor"))};
-                                TdApi.InlineKeyboardButton[] notBot = {new TdApi.InlineKeyboardButton("我不是机器人", new TdApi.InlineKeyboardButtonTypeCallback(String.format("nobot^%s@%s", "-1001334979774", 236978176).getBytes()))};
+                                TdApi.InlineKeyboardButton[] notBot = {new TdApi.InlineKeyboardButton("我不是机器人", new TdApi.InlineKeyboardButtonTypeCallback(String.format("nobot^%s@%s", senderID, chatId).getBytes()))};
                                 replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{notBot, rowBlog, rowGithub});
                                 logger.info(String.format("封禁新加群的%s@%s %s@%s", sender, chatName, senderID, chatId)); //打印文本
                                 client.send(new TdApi.SetChatMemberStatus(chatId, senderID, new TdApi.ChatMemberStatusRestricted(true, 0, new TdApi.ChatPermissions(false, false, false, false, false, false, false, false))), defaultHandler);
