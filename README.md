@@ -2,6 +2,8 @@
 
 用于开发java电报客户端的脚手架
 
+电报讨论组 https://t.me/popstary
+
 ## 目录说明
 
 - docs/ 用于存放javaDocs，方便查阅TdApi
