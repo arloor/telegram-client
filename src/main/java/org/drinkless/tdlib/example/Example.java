@@ -6,6 +6,7 @@ import org.drinkless.tdlib.TdApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.event.ChangeEvent;
 import java.io.IOError;
 import java.io.IOException;
 import java.io.BufferedReader;
@@ -20,6 +21,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
  * Example class for TDLib usage from Java.
@@ -450,8 +452,9 @@ public final class Example {
                     if (newCallbackQuery.payload instanceof TdApi.CallbackQueryPayloadData) {
                         byte[] reply = ((TdApi.CallbackQueryPayloadData) newCallbackQuery.payload).data;
                         String replyStr = new String(reply);
-                        boolean done = false;
+
                         if (replyStr.startsWith("nobot")) {
+                            boolean done = false;
                             String[] split = replyStr.split("\\^");
                             if (split.length == 2) {
                                 String userIdAndChatId = split[1];
@@ -467,11 +470,36 @@ public final class Example {
                                     }
                                 }
                             }
-
-                        }
-
-                        if (!done) {
-                            client.send(new TdApi.AnswerCallbackQuery(newCallbackQuery.id, "不要瞎点！", true, null, 1), defaultHandler);
+                            if (!done) {
+                                client.send(new TdApi.AnswerCallbackQuery(newCallbackQuery.id, "不要瞎点！", true, null, 1), defaultHandler);
+                            }
+                        } else if (replyStr.startsWith("admin_pass")) {
+                            String[] split = replyStr.split("\\^");
+                            if (split.length == 2) {
+                                String userIdAndChatId = split[1];
+                                String[] userIdChatIdSplit = userIdAndChatId.split("@");
+                                if (userIdChatIdSplit.length == 2) {
+                                    String replyMarkUserId = userIdChatIdSplit[0];
+                                    String replyMarkChatId = userIdChatIdSplit[1];
+                                    if (getChatId(replyMarkChatId) == chatId) {
+                                        client.send(new TdApi.GetChatAdministrators(chatId), (result) -> {
+                                            if (result instanceof TdApi.ChatAdministrators) {
+                                                TdApi.ChatAdministrators chatAdministrators = (TdApi.ChatAdministrators) result;
+                                                Set<Integer> adminUserIds = Arrays.stream(chatAdministrators.administrators)
+                                                        .filter(admin->admin.isOwner)
+                                                        .map(admin -> admin.userId)
+                                                        .collect(Collectors.toSet());
+                                                if(adminUserIds.contains(senderID)){
+                                                    client.send(new TdApi.SetChatMemberStatus(newCallbackQuery.chatId, Integer.parseInt(replyMarkUserId), new TdApi.ChatMemberStatusRestricted(true, 0, new TdApi.ChatPermissions(true, true, false, true, true, false, true, false))), defaultHandler);
+                                                    client.send(new TdApi.AnswerCallbackQuery(newCallbackQuery.id, "成功解封"+replyMarkUserId, true, null, 1), defaultHandler);
+                                                }else {
+                                                    client.send(new TdApi.AnswerCallbackQuery(newCallbackQuery.id, "再瞎点就报警了！", true, null, 1), defaultHandler);
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            }
                         }
                     }
                     break;
@@ -514,10 +542,11 @@ public final class Example {
 
                             TdApi.ReplyMarkupInlineKeyboard replyMarkup = null;
                             if (me != null && me.type instanceof TdApi.UserTypeBot) {//如果是bot，则增加防bot设置
-                                TdApi.InlineKeyboardButton[] rowBlog = {new TdApi.InlineKeyboardButton("博客地址", new TdApi.InlineKeyboardButtonTypeUrl("http://arloor.com"))};
-                                TdApi.InlineKeyboardButton[] rowGithub = {new TdApi.InlineKeyboardButton("Github", new TdApi.InlineKeyboardButtonTypeUrl("https://github.com/arloor"))};
+
+                                TdApi.InlineKeyboardButton[] rowBlogAndGithub = {new TdApi.InlineKeyboardButton("博客地址", new TdApi.InlineKeyboardButtonTypeUrl("http://arloor.com")), new TdApi.InlineKeyboardButton("Github", new TdApi.InlineKeyboardButtonTypeUrl("https://github.com/arloor"))};
                                 TdApi.InlineKeyboardButton[] notBot = {new TdApi.InlineKeyboardButton("我不是机器人", new TdApi.InlineKeyboardButtonTypeCallback(String.format("nobot^%s@%s", senderID, chatId).getBytes()))};
-                                replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{notBot, rowBlog, rowGithub});
+                                TdApi.InlineKeyboardButton[] adminPass = {new TdApi.InlineKeyboardButton("PASS[管理员]", new TdApi.InlineKeyboardButtonTypeCallback(String.format("admin_pass^%s@%s", senderID, chatId).getBytes()))};
+                                replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{notBot, rowBlogAndGithub, adminPass});
                                 logger.info(String.format("封禁新加群的%s@%s %s@%s", sender, chatName, senderID, chatId)); //打印文本
                                 client.send(new TdApi.SetChatMemberStatus(chatId, senderID, new TdApi.ChatMemberStatusRestricted(true, 0, new TdApi.ChatPermissions(false, false, false, false, false, false, false, false))), defaultHandler);
                                 msg += "请点击“我不是机器人”获取发言权限" + newLine
