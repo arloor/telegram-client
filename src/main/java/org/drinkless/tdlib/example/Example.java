@@ -59,6 +59,8 @@ public final class Example {
     private static final String commandsLine = "Enter command (gcs - GetChats, gc <chatId> - GetChat, me - GetMe, sm <chatId> <message> - SendMessage, lo - LogOut, q - Quit): \n";
     private static volatile String currentPrompt = null;
 
+    private static final int bootUnixTime= (int) (System.currentTimeMillis() / 1000L);
+
     static {
         try {
             System.loadLibrary("tdjni");
@@ -536,28 +538,32 @@ public final class Example {
                     if (adminChatId != null && chatId == getChatId(adminChatId)) {//管理群组的消息做特殊处理
                         // 本群组的所有消息类型都日志记录
                         logger.info(newLine + "(" + sender + ")@" + chatName + " " + senderID + "@" + chatId + newLine + object);
-                        if (message.message.content instanceof TdApi.MessageChatAddMembers) {
+                        if (message.message.content instanceof TdApi.MessageChatAddMembers && message.message.date>bootUnixTime) {
                             int[] memberUserIds = ((TdApi.MessageChatAddMembers) message.message.content).memberUserIds;
-                            String msg = "欢迎来到本群组~~~" + newLine;
+                            String finalSender = sender;
+                            String finalChatName = chatName;
+                            Arrays.stream(memberUserIds).forEach(newMemberId->{
+                                String msg = "欢迎来到本群组~~~" + newLine;
 
-                            TdApi.ReplyMarkupInlineKeyboard replyMarkup = null;
-                            if (me != null && me.type instanceof TdApi.UserTypeBot) {//如果是bot，则增加防bot设置
+                                TdApi.ReplyMarkupInlineKeyboard replyMarkup = null;
+                                if (me != null && me.type instanceof TdApi.UserTypeBot) {//如果是bot，则增加防bot设置
+                                    TdApi.InlineKeyboardButton[] rowBlogAndGithub = {new TdApi.InlineKeyboardButton("博客地址", new TdApi.InlineKeyboardButtonTypeUrl("http://arloor.com")), new TdApi.InlineKeyboardButton("Github", new TdApi.InlineKeyboardButtonTypeUrl("https://github.com/arloor"))};
+                                    TdApi.InlineKeyboardButton[] notBot = {new TdApi.InlineKeyboardButton("我不是机器人", new TdApi.InlineKeyboardButtonTypeCallback(String.format("nobot^%s@%s", newMemberId, chatId).getBytes()))};
+                                    TdApi.InlineKeyboardButton[] adminPass = {new TdApi.InlineKeyboardButton("PASS[管理员]", new TdApi.InlineKeyboardButtonTypeCallback(String.format("admin_pass^%s@%s", newMemberId, chatId).getBytes()))};
+                                    replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{notBot, rowBlogAndGithub, adminPass});
+                                    logger.info(String.format("封禁新加群的%s@%s %s@%s", finalSender, finalChatName, newMemberId, chatId)); //打印文本
+                                    client.send(new TdApi.SetChatMemberStatus(chatId, newMemberId, new TdApi.ChatMemberStatusRestricted(true, 0, new TdApi.ChatPermissions(false, false, false, false, false, false, false, false))), defaultHandler);
+                                    msg += "请点击“我不是机器人”获取发言权限" + newLine
+                                            + "—— From电报Tdlib jni应用";
+                                } else {
+                                    msg += "博客地址：http://arloor.com" + newLine
+                                            + "Github：https://github.com/arloor" + newLine
+                                            + "—— From电报Tdlib jni应用";
+                                }
+                                TdApi.InputMessageContent content = new TdApi.InputMessageText(new TdApi.FormattedText(msg, null), false, true);
+                                client.send(new TdApi.SendMessage(chatId, message.message.id, null, replyMarkup, content), defaultHandler);
+                            });
 
-                                TdApi.InlineKeyboardButton[] rowBlogAndGithub = {new TdApi.InlineKeyboardButton("博客地址", new TdApi.InlineKeyboardButtonTypeUrl("http://arloor.com")), new TdApi.InlineKeyboardButton("Github", new TdApi.InlineKeyboardButtonTypeUrl("https://github.com/arloor"))};
-                                TdApi.InlineKeyboardButton[] notBot = {new TdApi.InlineKeyboardButton("我不是机器人", new TdApi.InlineKeyboardButtonTypeCallback(String.format("nobot^%s@%s", senderID, chatId).getBytes()))};
-                                TdApi.InlineKeyboardButton[] adminPass = {new TdApi.InlineKeyboardButton("PASS[管理员]", new TdApi.InlineKeyboardButtonTypeCallback(String.format("admin_pass^%s@%s", senderID, chatId).getBytes()))};
-                                replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{notBot, rowBlogAndGithub, adminPass});
-                                logger.info(String.format("封禁新加群的%s@%s %s@%s", sender, chatName, senderID, chatId)); //打印文本
-                                client.send(new TdApi.SetChatMemberStatus(chatId, senderID, new TdApi.ChatMemberStatusRestricted(true, 0, new TdApi.ChatPermissions(false, false, false, false, false, false, false, false))), defaultHandler);
-                                msg += "请点击“我不是机器人”获取发言权限" + newLine
-                                        + "—— From电报Tdlib jni应用";
-                            } else {
-                                msg += "博客地址：http://arloor.com" + newLine
-                                        + "Github：https://github.com/arloor" + newLine
-                                        + "—— From电报Tdlib jni应用";
-                            }
-                            TdApi.InputMessageContent content = new TdApi.InputMessageText(new TdApi.FormattedText(msg, null), false, true);
-                            client.send(new TdApi.SendMessage(chatId, message.message.id, null, replyMarkup, content), defaultHandler);
                         }
                     }
                     break;
