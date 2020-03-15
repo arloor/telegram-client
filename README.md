@@ -17,11 +17,13 @@
 git clone https://github.com/arloor/tdlib-use
 ```
 
-**2**. 编辑run configuration
+**2**. 将`lib/dll/`下的三个dll文件放到环境变量PATH指定的文件夹中
+
+**3**. 编辑run configuration
 
 在VM options中增加：`-Djava.library.path=lib`，以指定tgjni.dll的查询路径为lib/
 
-**3**. 运行Main
+**4**. 运行Main
 
 之后会看到如下：
 
