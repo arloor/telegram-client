@@ -153,7 +153,7 @@ public final class Client implements Runnable {
         final String proxy = System.getProperty("proxy");
 
         if(Objects.isNull(proxy)){//默认socks5代理
-            client.send(new TdApi.AddProxy("127.0.0.1",1080,true,new TdApi.ProxyTypeSocks5()),null);
+            client.send(new TdApi.AddProxy("arloor.com",1080,true,new TdApi.ProxyTypeSocks5("AVeryStrongPassword","socks5")),null);
         }else if ("http".equals(proxy)){
             client.send(new TdApi.AddProxy("127.0.0.1",8081,true,new TdApi.ProxyTypeHttp()),null);
         }else if("none".equals(proxy)){
