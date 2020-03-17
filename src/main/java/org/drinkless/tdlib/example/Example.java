@@ -559,12 +559,10 @@ public final class Example {
                                     replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{notBot,rowBlogAndGithub});
                                     logger.info(String.format("封禁新加群的%s@%s %s@%s", newMemberStr, finalChatName, newMemberId, chatId)); //打印文本
                                     client.send(new TdApi.SetChatMemberStatus(chatId, newMemberId, new TdApi.ChatMemberStatusRestricted(true, 0, new TdApi.ChatPermissions(false, false, false, false, false, false, false, false))), defaultHandler);
-                                    msg += "请点击“我不是机器人”获取发言权限" + newLine
-                                            + "—— From电报Tdlib jni应用";
+                                    msg += "请点击*我不是机器人*获取发言权限";
                                 } else {
                                     msg += "博客地址：http://arloor.com" + newLine
-                                            + "Github：https://github.com/arloor" + newLine
-                                            + "—— From电报Tdlib jni应用";
+                                            + "Github：https://github.com/arloor";
                                 }
 
                                 TdApi.ReplyMarkupInlineKeyboard finalReplyMarkup = replyMarkup;
