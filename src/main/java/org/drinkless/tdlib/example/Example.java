@@ -540,18 +540,24 @@ public final class Example {
                         logger.info(newLine + "(" + sender + ")@" + chatName + " " + senderID + "@" + chatId + newLine + object);
                         if (message.message.content instanceof TdApi.MessageChatAddMembers && message.message.date>bootUnixTime) {
                             int[] memberUserIds = ((TdApi.MessageChatAddMembers) message.message.content).memberUserIds;
-                            String finalSender = sender;
                             String finalChatName = chatName;
                             Arrays.stream(memberUserIds).forEach(newMemberId->{
-                                String msg = "欢迎来到本群组~~~" + newLine;
+
+                                String newMemberStr = String.valueOf(newMemberId);
+                                TdApi.User newMemberUser = getOrQueryUser(newMemberId);
+                                if (Objects.nonNull(newMemberUser)) {
+                                    newMemberStr = newMemberUser.firstName + " " + (newMemberUser.lastName.length() > 0 ? newMemberUser.lastName : "");
+                                }
+
+                                String msg = String.format("欢迎[%s](tg://user?id=%s)来到本群组！",newMemberStr,newMemberId) + newLine;
 
                                 TdApi.ReplyMarkupInlineKeyboard replyMarkup = null;
                                 if (me != null && me.type instanceof TdApi.UserTypeBot) {//如果是bot，则增加防bot设置
-                                    TdApi.InlineKeyboardButton[] rowBlogAndGithub = {new TdApi.InlineKeyboardButton("博客地址", new TdApi.InlineKeyboardButtonTypeUrl("http://arloor.com")), new TdApi.InlineKeyboardButton("Github", new TdApi.InlineKeyboardButtonTypeUrl("https://github.com/arloor"))};
+                                    TdApi.InlineKeyboardButton[] rowBlogAndGithub = {new TdApi.InlineKeyboardButton("arloor.com", new TdApi.InlineKeyboardButtonTypeUrl("http://arloor.com")), new TdApi.InlineKeyboardButton("Github", new TdApi.InlineKeyboardButtonTypeUrl("https://github.com/arloor"))};
                                     TdApi.InlineKeyboardButton[] notBot = {new TdApi.InlineKeyboardButton("我不是机器人", new TdApi.InlineKeyboardButtonTypeCallback(String.format("nobot^%s@%s", newMemberId, chatId).getBytes()))};
                                     TdApi.InlineKeyboardButton[] adminPass = {new TdApi.InlineKeyboardButton("PASS[管理员]", new TdApi.InlineKeyboardButtonTypeCallback(String.format("admin_pass^%s@%s", newMemberId, chatId).getBytes()))};
-                                    replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{notBot, rowBlogAndGithub, adminPass});
-                                    logger.info(String.format("封禁新加群的%s@%s %s@%s", finalSender, finalChatName, newMemberId, chatId)); //打印文本
+                                    replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{notBot,adminPass,rowBlogAndGithub});
+                                    logger.info(String.format("封禁新加群的%s@%s %s@%s", newMemberStr, finalChatName, newMemberId, chatId)); //打印文本
                                     client.send(new TdApi.SetChatMemberStatus(chatId, newMemberId, new TdApi.ChatMemberStatusRestricted(true, 0, new TdApi.ChatPermissions(false, false, false, false, false, false, false, false))), defaultHandler);
                                     msg += "请点击“我不是机器人”获取发言权限" + newLine
                                             + "—— From电报Tdlib jni应用";
@@ -560,8 +566,19 @@ public final class Example {
                                             + "Github：https://github.com/arloor" + newLine
                                             + "—— From电报Tdlib jni应用";
                                 }
-                                TdApi.InputMessageContent content = new TdApi.InputMessageText(new TdApi.FormattedText(msg, null), false, true);
-                                client.send(new TdApi.SendMessage(chatId, message.message.id, null, replyMarkup, content), defaultHandler);
+
+                                TdApi.ReplyMarkupInlineKeyboard finalReplyMarkup = replyMarkup;
+                                String finalMsg = msg;
+                                client.send(new TdApi.ParseTextEntities(msg,new TdApi.TextParseModeMarkdown(2)),(formattedText)->{
+                                    if(formattedText instanceof TdApi.FormattedText){
+                                        TdApi.InputMessageContent content = new TdApi.InputMessageText((TdApi.FormattedText)formattedText, false, true);
+                                        client.send(new TdApi.SendMessage(chatId, message.message.id, null, finalReplyMarkup, content), defaultHandler);
+                                    }else {
+                                        TdApi.InputMessageContent content = new TdApi.InputMessageText(new TdApi.FormattedText(finalMsg, null), false, true);
+                                        client.send(new TdApi.SendMessage(chatId, message.message.id, null, finalReplyMarkup, content), defaultHandler);
+                                    }
+                                });
+
                             });
 
                         }
