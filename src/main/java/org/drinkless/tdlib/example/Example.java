@@ -549,7 +549,7 @@ public final class Example {
                                     newMemberStr = newMemberUser.firstName + " " + (newMemberUser.lastName.length() > 0 ? newMemberUser.lastName : "");
                                 }
 
-                                String msg = String.format("欢迎[%s](tg://user?id=%s)来到本群组！",newMemberStr,newMemberId) + newLine;
+                                String msg = String.format("欢迎[新朋友](tg://user?id=%s)来到本群组！",newMemberId) + newLine;
 
                                 TdApi.ReplyMarkupInlineKeyboard replyMarkup = null;
                                 if (me != null && me.type instanceof TdApi.UserTypeBot) {//如果是bot，则增加防bot设置
