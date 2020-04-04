@@ -11,6 +11,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <main>com.arloor.telegram.Telegram</main>
     </properties>
 
     <dependencies>
@@ -48,7 +49,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>org.drinkless.tdlib.example.Example</mainClass>
+                            <mainClass>${main}</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -66,7 +67,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.drinkless.tdlib.example.Example</mainClass>
+                            <mainClass>${main}</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
