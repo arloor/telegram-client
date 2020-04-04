@@ -116,8 +116,8 @@ public class Telegram {
                 parameters.databaseDirectory = "tdlib";
                 parameters.useMessageDatabase = true;
                 parameters.useSecretChats = true;
-                parameters.apiId = 94575;
-                parameters.apiHash = "a3406de8d171bb422bb6ddf3bbd800e2";
+                parameters.apiId = 861784;
+                parameters.apiHash = "dbaf939227b6ff24f0a0521e329c91e6";
                 parameters.systemLanguageCode = "en";
                 parameters.deviceModel = "Desktop";
                 parameters.systemVersion = "Unknown";
