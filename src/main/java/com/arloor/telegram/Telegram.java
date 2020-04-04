@@ -36,10 +36,10 @@ public class Telegram {
         client.send(new TdApi.GetMe(), (cell) -> {
             if (cell instanceof TdApi.User) {
                 me = (TdApi.User) cell;
-                Sender.sendAuthor("boot");
+
             }
         });
-
+        Sender.onBoot();
     }
 
     public static void main(String[] args) throws InterruptedException {
