@@ -11,10 +11,9 @@ import java.util.stream.Collectors;
 import static com.arloor.telegram.Telegram.defaultHandler;
 import static com.arloor.telegram.Telegram.getChatId;
 
-public class NewCallbackQueryHandler extends BaseHandler {
+public class NewCallbackQueryHandler extends BaseHandler<TdApi.UpdateNewCallbackQuery> {
     @Override
-    public void accept(TdApi.Object object) {
-        TdApi.UpdateNewCallbackQuery newCallbackQuery = (TdApi.UpdateNewCallbackQuery) object;
+    public boolean accept(TdApi.UpdateNewCallbackQuery newCallbackQuery) {
         //获取sender User信息
         int senderID = newCallbackQuery.senderUserId;
         String sender = String.valueOf(senderID);
@@ -83,5 +82,6 @@ public class NewCallbackQueryHandler extends BaseHandler {
                 }
             }
         }
+        return true;
     }
 }
