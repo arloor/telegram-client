@@ -11,18 +11,18 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Telegram {
-    protected static Client client = null;
+    public static Client client = null;
 
     private static TdApi.AuthorizationState authorizationState = null;
     private static volatile boolean haveAuthorization = false;
     private static volatile boolean quiting = false;
-    protected static final Client.ResultHandler defaultHandler = new DefaultHandler();
+    public static final Client.ResultHandler defaultHandler = new DefaultHandler();
     private static final Lock authorizationLock = new ReentrantLock();
     private static final Condition gotAuthorization = authorizationLock.newCondition();
 
     private static final String newLine = System.getProperty("line.separator");
     private static volatile String currentPrompt = null;
-    protected static TdApi.User me = null;
+    public static TdApi.User me = null;
     private static final String commandsLine = "Enter command (me - GetMe, sm <chatId> <message> - SendMessage, lo - LogOut, q - Quit): \n";
     public static final Properties CONFIG = new Properties();
 
