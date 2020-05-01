@@ -32,9 +32,9 @@ public abstract class BaseHandler implements Consumer<TdApi.Object> {
             return sendUser;
         } else {
             Telegram.client.send(new TdApi.GetUser(userID), (object) -> {
-                if (object instanceof TdApi.Chat) {
-                    TdApi.Chat chat = (TdApi.Chat) object;
-                    chats.put(chat.id, chat);
+                if (object instanceof TdApi.User) {
+                    TdApi.User user = (TdApi.User) object;
+                    users.put(user.id, user);
                 }
             });
             return null;
@@ -45,9 +45,9 @@ public abstract class BaseHandler implements Consumer<TdApi.Object> {
         TdApi.Chat targetChat = chats.get(chatId);
         if (Objects.isNull(targetChat)) {
             Telegram.client.send(new TdApi.GetChat(chatId), (object)->{
-                if (object instanceof TdApi.User) {
-                    TdApi.User user = (TdApi.User) object;
-                    users.put(user.id, user);
+                if (object instanceof TdApi.Chat) {
+                    TdApi.Chat chat = (TdApi.Chat) object;
+                    chats.put(chat.id, chat);
                 }
             });
             return null;
