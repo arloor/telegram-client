@@ -3,7 +3,10 @@ package com.arloor.telegram;
 import org.drinkless.tdlib.Client;
 import org.drinkless.tdlib.TdApi;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOError;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Properties;
 import java.util.concurrent.locks.Condition;
@@ -41,6 +44,7 @@ public class Telegram {
 
     /**
      * 启动时调用的方法
+     *
      * @param client
      */
     public static void onBoot(Client client) {
@@ -125,8 +129,8 @@ public class Telegram {
                 parameters.databaseDirectory = "tdlib";
                 parameters.useMessageDatabase = true;
                 parameters.useSecretChats = true;
-                parameters.apiId = Integer.parseInt(Telegram.CONFIG.getProperty("apiId","861784"));
-                parameters.apiHash = Telegram.CONFIG.getProperty("apiHash","dbaf939227b6ff24f0a0521e329c91e6");
+                parameters.apiId = Integer.parseInt(Telegram.CONFIG.getProperty("apiId", "861784"));
+                parameters.apiHash = Telegram.CONFIG.getProperty("apiHash", "dbaf939227b6ff24f0a0521e329c91e6");
                 parameters.systemLanguageCode = "en";
                 parameters.deviceModel = "Desktop";
                 parameters.systemVersion = "Unknown";
@@ -197,19 +201,20 @@ public class Telegram {
         }
     }
 
-    private static void setProxy(){
+    private static void setProxy() {
         final String proxyUri = Telegram.CONFIG.getProperty("proxy");
         if (proxyUri != null) {
             URI uri = URI.create(proxyUri);
             String schema = uri.getScheme();
             String userPass = uri.getAuthority();
-            String user= userPass.split(":")[0];
-            String pass= userPass.split(":").length==2?userPass.split(":")[1]:"";
+            String user = userPass.split(":")[0];
+            String pass = userPass.split(":").length == 2 ? userPass.split(":")[1] : "";
             String host = uri.getHost();
             int port = uri.getPort();
             if ("socks5".equals(schema)) {
                 client.send(new TdApi.AddProxy(host, port, true, new TdApi.ProxyTypeSocks5(user, pass)), null);
-            }if ("http".equals(schema)){
+            }
+            if ("http".equals(schema)) {
                 client.send(new TdApi.AddProxy(host, port, true, new TdApi.ProxyTypeSocks5(user, pass)), null);
             }
         }
