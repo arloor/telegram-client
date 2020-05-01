@@ -3,10 +3,9 @@ package com.arloor.telegram;
 import org.drinkless.tdlib.Client;
 import org.drinkless.tdlib.TdApi;
 
-import java.io.BufferedReader;
-import java.io.IOError;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.URI;
+import java.util.Properties;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -25,18 +24,29 @@ public class Telegram {
     private static volatile String currentPrompt = null;
     protected static TdApi.User me = null;
     private static final String commandsLine = "Enter command (me - GetMe, sm <chatId> <message> - SendMessage, lo - LogOut, q - Quit): \n";
+    public static final Properties CONFIG = new Properties();
+
     static {
         try {
             System.loadLibrary("tdjni");
         } catch (UnsatisfiedLinkError e) {
             e.printStackTrace();
         }
+        try {
+            CONFIG.load(Telegram.class.getClassLoader().getResourceAsStream("telegram.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
+    /**
+     * 启动时调用的方法
+     * @param client
+     */
     public static void onBoot(Client client) {
         client.send(new TdApi.GetMe(), (cell) -> {
             if (cell instanceof TdApi.User) {
                 me = (TdApi.User) cell;
-
             }
         });
         Sender.onBoot();
@@ -52,6 +62,7 @@ public class Telegram {
 
         // create client
         client = Client.create(new UpdatesHandler(), null, null);
+        setProxy();
 
         // test Client.execute
         //defaultHandler.onResult(Client.execute(new TdApi.GetTextEntities("@telegram /test_command https://telegram.org telegram.me @gif @test")));
@@ -67,9 +78,7 @@ public class Telegram {
             } finally {
                 authorizationLock.unlock();
             }
-
             onBoot(client);
-
             while (haveAuthorization) {
                 getCommand();
             }
@@ -116,8 +125,8 @@ public class Telegram {
                 parameters.databaseDirectory = "tdlib";
                 parameters.useMessageDatabase = true;
                 parameters.useSecretChats = true;
-                parameters.apiId = 861784;
-                parameters.apiHash = "dbaf939227b6ff24f0a0521e329c91e6";
+                parameters.apiId = Integer.parseInt(Telegram.CONFIG.getProperty("apiId","861784"));
+                parameters.apiHash = Telegram.CONFIG.getProperty("apiHash","dbaf939227b6ff24f0a0521e329c91e6");
                 parameters.systemLanguageCode = "en";
                 parameters.deviceModel = "Desktop";
                 parameters.systemVersion = "Unknown";
@@ -180,10 +189,29 @@ public class Telegram {
                 print("Closed");
                 if (!quiting) {
                     client = Client.create(new UpdatesHandler(), null, null); // recreate client after previous has closed
+                    setProxy();
                 }
                 break;
             default:
                 System.err.println("Unsupported authorization state:" + newLine + authorizationState);
+        }
+    }
+
+    private static void setProxy(){
+        final String proxyUri = Telegram.CONFIG.getProperty("proxy");
+        if (proxyUri != null) {
+            URI uri = URI.create(proxyUri);
+            String schema = uri.getScheme();
+            String userPass = uri.getAuthority();
+            String user= userPass.split(":")[0];
+            String pass= userPass.split(":").length==2?userPass.split(":")[1]:"";
+            String host = uri.getHost();
+            int port = uri.getPort();
+            if ("socks5".equals(schema)) {
+                client.send(new TdApi.AddProxy(host, port, true, new TdApi.ProxyTypeSocks5(user, pass)), null);
+            }if ("http".equals(schema)){
+                client.send(new TdApi.AddProxy(host, port, true, new TdApi.ProxyTypeSocks5(user, pass)), null);
+            }
         }
     }
 

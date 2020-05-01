@@ -22,7 +22,7 @@ public class UpdatesHandler implements Client.ResultHandler {
     private static final String newLine = System.getProperty("line.separator");
     private static final Logger logger = LoggerFactory.getLogger(UpdatesHandler.class);
 
-    private static final String adminChatId = System.getProperty("admin.chat.id");
+    private static final String adminChatId = Telegram.CONFIG.getProperty("mygroup");
 
     private static final int bootUnixTime= (int) (System.currentTimeMillis() / 1000L);
 
