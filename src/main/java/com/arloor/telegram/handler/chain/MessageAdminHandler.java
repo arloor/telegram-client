@@ -75,6 +75,6 @@ public class MessageAdminHandler extends BaseHandler<TdApi.UpdateNewMessage> {
 
             }
         }
-        return true;
+        return false;
     }
 }
