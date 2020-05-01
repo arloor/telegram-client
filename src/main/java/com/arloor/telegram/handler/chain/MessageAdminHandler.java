@@ -32,7 +32,7 @@ public class MessageAdminHandler extends BaseHandler<TdApi.UpdateNewMessage> {
             return false;
         } else {
             // 本群组的所有消息类型都日志记录
-            logger.info(newLine + "(" + sender + ")@" + chatName + " " + senderID + "@" + chatId + newLine + message);
+//            logger.info(newLine + "(" + sender + ")@" + chatName + " " + senderID + "@" + chatId + newLine + message);
             if (message.message.content instanceof TdApi.MessageChatAddMembers && message.message.date > bootUnixTime) {
                 int[] memberUserIds = ((TdApi.MessageChatAddMembers) message.message.content).memberUserIds;
                 String finalChatName = chatName;
