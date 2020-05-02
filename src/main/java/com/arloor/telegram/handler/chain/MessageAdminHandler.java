@@ -1,7 +1,9 @@
 package com.arloor.telegram.handler.chain;
 
+import com.alibaba.fastjson.JSONObject;
 import com.arloor.telegram.Telegram;
 import com.arloor.telegram.handler.BaseHandler;
+import com.arloor.telegram.vo.Op;
 import org.drinkless.tdlib.TdApi;
 
 import java.util.Arrays;
@@ -48,10 +50,12 @@ public class MessageAdminHandler extends BaseHandler<TdApi.UpdateNewMessage> {
 
                     TdApi.ReplyMarkupInlineKeyboard replyMarkup = null;
                     if (Telegram.me != null && Telegram.me.type instanceof TdApi.UserTypeBot) {//如果是bot，则增加防bot设置
+                        String adminPass = JSONObject.toJSONString(new Op(Op.ADMIN_PASS, newMemberId, chatId));
+                        String nobot = JSONObject.toJSONString(new Op(Op.NOBOT, newMemberId, chatId));
                         TdApi.InlineKeyboardButton[] rowBlogAndGithub = {new TdApi.InlineKeyboardButton("arloor.com", new TdApi.InlineKeyboardButtonTypeUrl("http://arloor.com")), new TdApi.InlineKeyboardButton("Github", new TdApi.InlineKeyboardButtonTypeUrl("https://github.com/arloor"))};
-                        TdApi.InlineKeyboardButton[] notBot = {new TdApi.InlineKeyboardButton("我不是机器人", new TdApi.InlineKeyboardButtonTypeCallback(String.format("nobot^%s@%s", newMemberId, chatId).getBytes()))};
-                        TdApi.InlineKeyboardButton[] adminPass = {new TdApi.InlineKeyboardButton("PASS[管理员]", new TdApi.InlineKeyboardButtonTypeCallback(String.format("admin_pass^%s@%s", newMemberId, chatId).getBytes()))};
-                        replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{notBot, rowBlogAndGithub});
+                        TdApi.InlineKeyboardButton[] notBotRow = {new TdApi.InlineKeyboardButton("我不是机器人", new TdApi.InlineKeyboardButtonTypeCallback(nobot.getBytes()))};
+                        TdApi.InlineKeyboardButton[] adminPassRow = {new TdApi.InlineKeyboardButton("PASS[管理员]", new TdApi.InlineKeyboardButtonTypeCallback(adminPass.getBytes()))};
+                        replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{notBotRow});
                         logger.info(String.format("封禁新加群的%s@%s %s@%s", newMemberStr, finalChatName, newMemberId, chatId)); //打印文本
                         Telegram.client.send(new TdApi.SetChatMemberStatus(chatId, newMemberId, new TdApi.ChatMemberStatusRestricted(true, 0, new TdApi.ChatPermissions(false, false, false, false, false, false, false, false))), defaultHandler);
                         msg += "请点击*我不是机器人*获取发言权限";
