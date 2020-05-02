@@ -12,7 +12,7 @@
     </appender>
     <!-- 按照每天生成日志文件 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_HOME}/proxy/proxy.log</file>
+        <file>${LOG_HOME}/telegram/telegram.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- rollover daily -->
             <fileNamePattern>${LOG_HOME}/telegram/telegram-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
