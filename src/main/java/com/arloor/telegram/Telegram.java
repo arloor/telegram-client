@@ -1,7 +1,10 @@
 package com.arloor.telegram;
 
+import org.apache.http.HttpHost;
 import org.drinkless.tdlib.Client;
 import org.drinkless.tdlib.TdApi;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 
 import java.io.BufferedReader;
 import java.io.IOError;
@@ -16,6 +19,9 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Telegram {
     public static Client client = null;
 
+    public static RestHighLevelClient es = new RestHighLevelClient(
+            RestClient.builder(
+                    new HttpHost("localhost", 9200, "http")));
     private static TdApi.AuthorizationState authorizationState = null;
     private static volatile boolean haveAuthorization = false;
     private static volatile boolean quiting = false;
@@ -57,6 +63,16 @@ public class Telegram {
     }
 
     public static void main(String[] args) throws InterruptedException {
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                System.out.println("closing");
+                es.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }));
+
 
         // disable TDLib log
         Client.execute(new TdApi.SetLogVerbosityLevel(0));
@@ -110,6 +126,9 @@ public class Telegram {
                     quiting = true;
                     haveAuthorization = false;
                     client.send(new TdApi.Close(), defaultHandler);
+                    break;
+                case "e":
+                    System.exit(0);
                     break;
                 default:
                     System.err.println("Unsupported command: " + command);
@@ -278,5 +297,6 @@ public class Telegram {
         TdApi.InputMessageContent content = new TdApi.InputMessageText(new TdApi.FormattedText(message, null), false, true);
         client.send(new TdApi.SendMessage(chatId, 0, null, null, content), defaultHandler);
     }
+
 
 }
