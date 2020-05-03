@@ -53,8 +53,8 @@ public class MessageContentHandler extends BaseHandler<TdApi.UpdateNewMessage> {
             logger.info("\n" + log); //打印文本
             Date time = new Date(message.message.date);
 
-            if (formattedText.text.startsWith("搜索")) {
-                String query = formattedText.text.substring(2);
+            if (message.message.chatId > 0 && System.currentTimeMillis() > bootUnixTime) {
+                String query = formattedText.text;
                 if (query.length() != 0) {
                     SearchTemplateRequest request = new SearchTemplateRequest();
                     request.setRequest(new SearchRequest("telegram"));
@@ -87,7 +87,7 @@ public class MessageContentHandler extends BaseHandler<TdApi.UpdateNewMessage> {
                 return true;
             }
 
-            if (message.message.forwardInfo == null && String.valueOf(message.message.chatId).equals(adminChatId)) {
+            if (message.message.forwardInfo == null && message.message.chatId < 0) {
                 MessageVo messageVo = new MessageVo(senderID, chatId, message.message.id, time, formattedText.text);
                 IndexRequest request = new IndexRequest(
                         "telegram",
