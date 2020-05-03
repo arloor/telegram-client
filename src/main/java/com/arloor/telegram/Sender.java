@@ -3,8 +3,8 @@ package com.arloor.telegram;
 import org.drinkless.tdlib.TdApi;
 
 public class Sender {
-    private static final long author = Telegram.getChatId(Telegram.CONFIG.getProperty("author"));
-    private static final long group = Telegram.getChatId(Telegram.CONFIG.getProperty("mygroup"));
+    public static final long author = Telegram.getChatId(Telegram.CONFIG.getProperty("author"));
+    public static final long group = Telegram.getChatId(Telegram.CONFIG.getProperty("mygroup"));
 
     public static void sendAuthor(String msg) {
         Telegram.sendMessage(author, msg);

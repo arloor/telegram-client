@@ -1,9 +1,6 @@
 package com.arloor.telegram;
 
-import com.arloor.telegram.handler.AuthorizationStateHandler;
-import com.arloor.telegram.handler.BaseHandler;
-import com.arloor.telegram.handler.NewCallbackQueryHandler;
-import com.arloor.telegram.handler.NewMessageHandler;
+import com.arloor.telegram.handler.*;
 import org.drinkless.tdlib.Client;
 import org.drinkless.tdlib.TdApi;
 
@@ -18,6 +15,7 @@ public class UpdatesHandler implements Client.ResultHandler {
         lookup.put(TdApi.UpdateNewCallbackQuery.CONSTRUCTOR, new NewCallbackQueryHandler());
         lookup.put(TdApi.UpdateNewMessage.CONSTRUCTOR, new NewMessageHandler());
         lookup.put(TdApi.UpdateAuthorizationState.CONSTRUCTOR, new AuthorizationStateHandler());
+        lookup.put(TdApi.UpdateNewInlineQuery.CONSTRUCTOR, new InlineQueryHandler());
     }
 
     @Override

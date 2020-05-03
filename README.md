@@ -57,3 +57,34 @@ Enter command (gcs - GetChats, gc <chatId> - GetChat, me - GetMe, sm <chatId> <m
 ```
 
 该项目同时可以用于登录电报bot
+
+
+```shell script
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  },
+  "mappings": {
+	"_doc": {
+		"properties": {
+			"senderId": {
+				"type": "integer"
+			},
+			"chatId": {
+				"type": "long"
+			},
+			"id": {
+				"type": "long"
+			},
+			"time": {
+				"type": "date"
+			},
+			"content": {
+				"type": "text"
+			}
+		}
+	}
+}
+}
+```
