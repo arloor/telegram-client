@@ -61,7 +61,7 @@ public class MessageContentHandler extends BaseHandler<TdApi.UpdateNewMessage> {
 
                     request.setScriptType(ScriptType.INLINE);
                     request.setScript(
-                            "{\"from\":0,\"size\":100,\"min_score\":4,\"query\":{\"function_score\":{\"query\":{\"match_all\":{}},\"boost_mode\":\"replace\",\"functions\":[{\"script_score\":{\"script\":{\"source\":\"term_score\",\"lang\":\"expert_scripts\",\"params\":{\"field\":[\"content^1\"],\"query\":\"{{query}}\"}}}}]}}}");
+                            "{\"from\":0,\"size\":100,\"min_score\":16,\"query\":{\"function_score\":{\"query\":{\"match_all\":{}},\"boost_mode\":\"replace\",\"functions\":[{\"script_score\":{\"script\":{\"source\":\"term_score\",\"lang\":\"expert_scripts\",\"params\":{\"field\":[\"content^1\"],\"query\":\"{{query}}\"}}}}]}}}");
 
                     Map<String, Object> scriptParams = new HashMap<>();
                     scriptParams.put("query", query);

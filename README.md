@@ -88,3 +88,36 @@ Enter command (gcs - GetChats, gc <chatId> - GetChat, me - GetMe, sm <chatId> <m
 }
 }
 ```
+
+```shell script
+ curl localhost:9200/_search -d '
+{
+  "from": 0,
+  "size": 100,
+  "min_score": 4,
+  "query": {
+    "function_score": {
+      "query": {
+        "match_all": {}
+      },
+      "boost_mode": "replace",
+      "functions": [
+        {
+          "script_score": {
+            "script": {
+              "source": "term_score",
+              "lang": "expert_scripts",
+              "params": {
+                "field": [
+                  "content^1"
+                ],
+                "query": "搜索"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}' -XPOST -H "content-type:application/json"
+```
