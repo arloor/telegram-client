@@ -51,7 +51,7 @@ public class MessageContentHandler extends BaseHandler<TdApi.UpdateNewMessage> {
             logger.info("\n" + log); //打印文本
             Date time = new Date(message.message.date);
 
-            if (message.message.chatId > 0 && System.currentTimeMillis() > bootUnixTime) {
+            if (message.message.chatId > 0 && message.message.date > bootUnixTime) {
                 String query = formattedText.text;
                 if (query.length() != 0) {
                     SearchTemplateRequest request = new SearchTemplateRequest();
