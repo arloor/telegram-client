@@ -105,7 +105,7 @@ public class MessageContentHandler extends BaseHandler<TdApi.UpdateNewMessage> {
             logger.info("\n" + log); //打印文本
             Date time = new Date(message.message.date);
 
-            if (message.message.forwardInfo == null && message.message.chatId < 0) {
+            if (message.message.forwardInfo == null && message.message.chatId < 0 && photoCaption.text.trim().length() != 0) {
                 MessageVo messageVo = new MessageVo(senderID, chatId, message.message.id, time, photoCaption.text);
                 IndexRequest request = new IndexRequest(
                         "telegram",
