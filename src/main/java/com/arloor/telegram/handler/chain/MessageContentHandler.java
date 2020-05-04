@@ -98,9 +98,27 @@ public class MessageContentHandler extends BaseHandler<TdApi.UpdateNewMessage> {
                 }
             }
 
-        } else {
-            //打印其他类型
-//                        System.out.println(JSONObject.toJSON(messageContent));
+        } else if (messageContent instanceof TdApi.MessagePhoto) {
+            TdApi.MessagePhoto photo = (TdApi.MessagePhoto) messageContent;
+            TdApi.FormattedText photoCaption = photo.caption;
+            String log = String.format("(%s) @%s (%s)@%s\n%s\n", sender, chatName, senderID, chatId, photoCaption.text);
+            logger.info("\n" + log); //打印文本
+            Date time = new Date(message.message.date);
+
+            if (message.message.forwardInfo == null && message.message.chatId < 0) {
+                MessageVo messageVo = new MessageVo(senderID, chatId, message.message.id, time, photoCaption.text);
+                IndexRequest request = new IndexRequest(
+                        "telegram",
+                        "_doc",
+                        chatId + "_" + message.message.id);
+                String jsonString = JSONObject.toJSONString(messageVo);
+                request.source(jsonString, XContentType.JSON);
+                try {
+                    IndexResponse indexResponse = es.index(request, RequestOptions.DEFAULT);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return false;
     }
