@@ -1,7 +1,6 @@
 package com.arloor.telegram.handler.chain;
 
 import com.alibaba.fastjson.JSONObject;
-import com.arloor.telegram.Telegram;
 import com.arloor.telegram.handler.BaseHandler;
 import com.arloor.telegram.vo.MessageVo;
 import org.drinkless.tdlib.TdApi;
@@ -21,8 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.arloor.telegram.Telegram.client;
-import static com.arloor.telegram.Telegram.es;
+import static com.arloor.telegram.Telegram.*;
 
 /**
  * 处理content类型的message
@@ -70,14 +68,12 @@ public class MessageContentHandler extends BaseHandler<TdApi.UpdateNewMessage> {
                         SearchTemplateResponse response = es.searchTemplate(request, RequestOptions.DEFAULT);
                         SearchHit[] hits = response.getResponse().getHits().getHits();
                         if (hits.length != 0) {
-                            TdApi.InputMessageSticker sticker = new TdApi.InputMessageSticker(new TdApi.InputFileRemote("CAACAgUAAxkBAANjXoiWiurqkSc5BLK1sfO7l1EEoOEAAvAFAAL4xsUK2Geb7lWvkgMYBA"), null, 320, 301);
-                            Telegram.client.send(new TdApi.SendMessage(senderID, 0, null, null, sticker), result -> {
-                                for (int i = 0; i < hits.length; i++) {
-                                    Map<String, Object> doc = hits[i].getSourceAsMap();
-                                    System.out.println(JSONObject.toJSONString(doc));
-                                    client.send(new TdApi.ForwardMessages(senderID, (Long) doc.get("chatId"), new long[]{Long.parseLong(String.valueOf(doc.get("id")))}, null, false, false, false), null);
-                                }
-                            });
+                            for (int i = 0; i < hits.length; i++) {
+                                Map<String, Object> doc = hits[i].getSourceAsMap();
+                                client.send(new TdApi.ForwardMessages(senderID, (Long) doc.get("chatId"), new long[]{Long.parseLong(String.valueOf(doc.get("id")))}, null, false, false, false), null);
+                            }
+                        } else {
+                            sendMessage(senderID, "没有找到相关的消息记录");
                         }
 
                     } catch (IOException e) {
