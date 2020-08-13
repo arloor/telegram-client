@@ -4,14 +4,9 @@ import org.drinkless.tdlib.TdApi;
 
 public class Sender {
     private static final long author = Telegram.getChatId(Telegram.CONFIG.getProperty("author"));
-    private static final long group = Telegram.getChatId(Telegram.CONFIG.getProperty("mygroup"));
 
     public static void sendAuthor(String msg) {
         Telegram.sendMessage(author, msg);
-    }
-
-    public static void sendGroup(String msg) {
-        Telegram.sendMessage(group, msg);
     }
 
     public static void onBoot() {

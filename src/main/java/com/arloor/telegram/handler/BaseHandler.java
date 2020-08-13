@@ -7,9 +7,13 @@ import org.drinkless.tdlib.TdApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public abstract class BaseHandler<T extends TdApi.Object> {
 
@@ -18,7 +22,7 @@ public abstract class BaseHandler<T extends TdApi.Object> {
     protected static final String newLine = System.getProperty("line.separator");
     protected static final Logger logger = LoggerFactory.getLogger(UpdatesHandler.class);
 
-    protected static final String adminChatId = Telegram.CONFIG.getProperty("mygroup");
+    protected static final Set<String> myGroups = Arrays.stream(Telegram.CONFIG.getProperty("mygroup").split(",")).collect(Collectors.toSet());
 
     protected static final int bootUnixTime = (int) (System.currentTimeMillis() / 1000L);
 

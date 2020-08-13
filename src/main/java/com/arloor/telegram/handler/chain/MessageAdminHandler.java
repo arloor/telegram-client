@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import static com.arloor.telegram.Telegram.defaultHandler;
-import static com.arloor.telegram.Telegram.getChatId;
 
 public class MessageAdminHandler extends BaseHandler<TdApi.UpdateNewMessage> {
     @Override
@@ -30,7 +29,7 @@ public class MessageAdminHandler extends BaseHandler<TdApi.UpdateNewMessage> {
             chatName = targetChat.title;
         }
 
-        if (adminChatId == null || chatId != getChatId(adminChatId)) {
+        if (myGroups == null ||  !myGroups.contains(String.valueOf(chatId))) {
             return false;
         } else {
             // 本群组的所有消息类型都日志记录
