@@ -1,14 +1,20 @@
-package com.arloor.telegram.handler;
+package com.arloor.telegram.handler.base;
 
 import org.drinkless.tdlib.TdApi;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class BaseChainHandler<T extends TdApi.Object> extends BaseHandler<T> {
+public abstract class BaseChainHandler<T extends TdApi.Object> extends BaseHandler<T> {
 
-    List<BaseHandler<T>> chain = new ArrayList<>();
+    private List<BaseHandler<T>> chain;
+
+
+    public BaseChainHandler() {
+        this.chain = init();
+    }
+
+    public abstract List<BaseHandler<T>>  init();
 
     @Override
     public boolean accept(T object) {

@@ -1,7 +1,7 @@
 package com.arloor.telegram;
 
 import com.arloor.telegram.handler.AuthorizationStateHandler;
-import com.arloor.telegram.handler.BaseHandler;
+import com.arloor.telegram.handler.base.BaseHandler;
 import com.arloor.telegram.handler.NewCallbackQueryHandler;
 import com.arloor.telegram.handler.NewMessageHandler;
 import org.drinkless.tdlib.Client;

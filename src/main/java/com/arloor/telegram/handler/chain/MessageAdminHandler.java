@@ -2,7 +2,7 @@ package com.arloor.telegram.handler.chain;
 
 import com.alibaba.fastjson.JSONObject;
 import com.arloor.telegram.Telegram;
-import com.arloor.telegram.handler.BaseHandler;
+import com.arloor.telegram.handler.base.BaseHandler;
 import com.arloor.telegram.vo.Op;
 import org.drinkless.tdlib.TdApi;
 

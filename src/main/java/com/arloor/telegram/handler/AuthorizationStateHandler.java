@@ -1,6 +1,7 @@
 package com.arloor.telegram.handler;
 
 import com.arloor.telegram.Telegram;
+import com.arloor.telegram.handler.base.BaseHandler;
 import org.drinkless.tdlib.TdApi;
 
 public class AuthorizationStateHandler extends BaseHandler<TdApi.UpdateAuthorizationState> {

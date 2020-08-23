@@ -1,6 +1,6 @@
 package com.arloor.telegram.handler.chain;
 
-import com.arloor.telegram.handler.BaseHandler;
+import com.arloor.telegram.handler.base.BaseHandler;
 import org.drinkless.tdlib.TdApi;
 
 import java.util.Objects;
