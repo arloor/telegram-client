@@ -24,6 +24,7 @@ WantedBy=multi-user.target
 EOF
 
 cat > /opt/tg/telegram.properties <<EOF
+#proxy=socks5://user:password@localhost:1080
 apiId=861784
 apiHash=dbaf939227b6ff24f0a0521e329c91e6
 author=878823128
