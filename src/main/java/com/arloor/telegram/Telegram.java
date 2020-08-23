@@ -3,10 +3,7 @@ package com.arloor.telegram;
 import org.drinkless.tdlib.Client;
 import org.drinkless.tdlib.TdApi;
 
-import java.io.BufferedReader;
-import java.io.IOError;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URI;
 import java.util.Properties;
 import java.util.concurrent.locks.Condition;
@@ -35,11 +32,6 @@ public class Telegram {
         } catch (UnsatisfiedLinkError e) {
             e.printStackTrace();
         }
-        try {
-            CONFIG.load(Telegram.class.getClassLoader().getResourceAsStream("telegram.properties"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -56,7 +48,18 @@ public class Telegram {
         Sender.onBoot();
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
+        String propertiesPath = null;
+        if (args.length == 2 && args[0].equals("-c")) {
+            propertiesPath = args[1];
+        }
+        Properties properties = new Properties();
+        if (propertiesPath != null) {
+            CONFIG.load(new FileReader(new File(propertiesPath)));
+        } else {
+            CONFIG.load(Telegram.class.getClassLoader().getResourceAsStream("telegram.properties"));
+        }
+
 
         // disable TDLib log
         Client.execute(new TdApi.SetLogVerbosityLevel(0));
