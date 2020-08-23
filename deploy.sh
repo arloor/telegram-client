@@ -37,5 +37,5 @@ systemctl daemon-reload
 systemctl enable tg
 systemctl stop tg
 systemctl start tg
-systemctl status tg
+service tg status --no-page
 "
