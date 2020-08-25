@@ -14,7 +14,7 @@ Wants=network-online.target
 
 [Service]
 WorkingDirectory=/opt/tg
-ExecStart=/usr/bin/java -Djava.library.path=/usr/local/bin -jar  /opt/tg/tdlib-use-1.0-SNAPSHOT-jar-with-dependencies.jar -c /opt/tg/telegram.properties
+ExecStart=/usr/bin/java -Djava.library.path=/usr/local/bin -jar  /opt/tg/telegram-client-1.0-SNAPSHOT-jar-with-dependencies.jar -c /opt/tg/telegram.properties
 LimitNOFILE=100000
 Restart=always
 RestartSec=60
