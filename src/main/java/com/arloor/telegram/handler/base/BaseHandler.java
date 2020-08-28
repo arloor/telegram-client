@@ -22,8 +22,6 @@ public abstract class BaseHandler<T extends TdApi.Object> {
     protected static final String newLine = System.getProperty("line.separator");
     protected static final Logger logger = LoggerFactory.getLogger(UpdatesHandler.class);
 
-    protected static final Set<String> myGroups = Arrays.stream(Telegram.CONFIG.getProperty("mygroup").split(",")).collect(Collectors.toSet());
-
     protected static final int bootUnixTime = (int) (System.currentTimeMillis() / 1000L);
 
     public abstract boolean accept(T object);
